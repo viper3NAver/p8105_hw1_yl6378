@@ -1,0 +1,49 @@
+---
+title: "Homework 1"
+author: "yl6378"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+```
+
+## Problem 1
+
+```{r load-penguins}
+data("penguins", package = "palmerpenguins")
+```
+
+The penguins dataset contains measurements of penguins from the Palmer Archipelago in Antarctica. It has `r nrow(penguins)` rows and `r ncol(penguins)` columns. Important variables include species (`r paste(levels(penguins$species), collapse = ", ")`), island (`r paste(levels(penguins$island), collapse = ", ")`), bill length and depth (mm), flipper length (mm), body mass (g), sex, and year.
+
+The mean flipper length is `r round(mean(penguins$flipper_length_mm, na.rm = TRUE), 2)` mm, excluding missing values.
+
+```{r penguin-scatterplot}
+penguin_plot = ggplot(
+  penguins,
+  aes(x = bill_length_mm, y = flipper_length_mm, color = species)
+) +
+  geom_point(na.rm = TRUE) +
+  labs(
+    title = "Flipper length versus bill length",
+    x = "Bill length (mm)",
+    y = "Flipper length (mm)",
+    color = "Species"
+  )
+
+penguin_plot
+
+ggsave(
+  filename = "penguin_scatterplot.png",
+  plot = penguin_plot,
+  width = 7,
+  height = 5,
+  units = "in",
+  dpi = 300
+)
+```
+
+The scatterplot shows the relationship between bill length and flipper length, with different colors representing the three penguin species. Penguins with missing measurements are omitted from the plot.
+
