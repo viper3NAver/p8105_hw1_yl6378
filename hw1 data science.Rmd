@@ -47,3 +47,51 @@ ggsave(
 
 The scatterplot shows the relationship between bill length and flipper length, with different colors representing the three penguin species. Penguins with missing measurements are omitted from the plot.
 
+
+
+## Problem 2
+
+```{r create-dataframe}
+set.seed(123)
+
+variable_types = tibble(
+  normal_sample = rnorm(10),
+  is_positive = normal_sample > 0,
+  character_values = c(
+    "apple", "banana", "cherry", "apple", "banana",
+    "cherry", "apple", "banana", "cherry", "apple"
+  ),
+  factor_values = factor(
+    c("low", "medium", "high", "low", "medium",
+      "high", "low", "medium", "high", "low"),
+    levels = c("low", "medium", "high")
+  )
+)
+
+variable_types
+```
+
+This data frame contains a random sample of 10 values from a standard Normal distribution, a logical variable indicating whether each value is greater than zero, a character variable, and a factor with three levels: low, medium, and high. Setting a seed makes the random sample reproducible.
+
+```{r calculate-means}
+mean(pull(variable_types, normal_sample))
+mean(pull(variable_types, is_positive))
+mean(pull(variable_types, character_values))
+mean(pull(variable_types, factor_values))
+```
+
+The mean of the numeric sample is `r round(mean(pull(variable_types, normal_sample)), 3)`. The mean of the logical variable is `r mean(pull(variable_types, is_positive))`, which is the proportion of sample values greater than zero. R treats TRUE as 1 and FALSE as 0 when calculating this mean.
+
+The character and factor variables both return NA with warnings when passed directly to mean(), because these types are not accepted as numeric inputs by mean().
+
+```{r numeric-coercion, results='hide', warning=FALSE}
+as.numeric(pull(variable_types, is_positive))
+as.numeric(pull(variable_types, character_values))
+as.numeric(pull(variable_types, factor_values))
+```
+
+Converting the logical variable to numeric produces 1 for TRUE and 0 for FALSE. This explains why its mean can be calculated directly.
+
+Converting the character variable produces NA values and a warning because the fruit names cannot be interpreted as numbers.
+
+Converting the factor produces its internal integer codes: 1 for low, 2 for medium, and 3 for high, following the specified level order. These codes represent categories rather than measured quantities. Although their mean could be calculated after conversion, it would not be a meaningful average of the categories. The original factor cannot be averaged directly.
