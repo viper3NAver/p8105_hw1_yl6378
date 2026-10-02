@@ -1,0 +1,103 @@
+---
+title: "Homework 1"
+author: "yl6378"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+```
+
+## Problem 1
+
+```{r load-penguins}
+data("penguins", package = "palmerpenguins")
+```
+
+The penguins dataset contains measurements of penguins from the Palmer Archipelago in Antarctica. It has `r nrow(penguins)` rows and `r ncol(penguins)` columns, with each row representing an individual penguin.
+
+Important variables include species (`r paste(levels(penguins$species), collapse = ", ")`), island (`r paste(levels(penguins$island), collapse = ", ")`), bill length and bill depth (mm), flipper length (mm), body mass (g), sex, and year. The observations span `r min(penguins$year)` to `r max(penguins$year)`.
+
+The mean flipper length is `r round(mean(penguins$flipper_length_mm, na.rm = TRUE), 2)` mm, excluding `r sum(is.na(penguins$flipper_length_mm))` missing flipper length measurements.
+
+```{r penguin-scatterplot}
+penguin_plot = ggplot(
+  penguins,
+  aes(
+    x = bill_length_mm,
+    y = flipper_length_mm,
+    color = species
+  )
+) +
+  geom_point(na.rm = TRUE) +
+  labs(
+    title = "Flipper length versus bill length",
+    x = "Bill length (mm)",
+    y = "Flipper length (mm)",
+    color = "Species"
+  )
+
+penguin_plot
+
+ggsave(
+  filename = "penguin_scatterplot.png",
+  plot = penguin_plot,
+  width = 7,
+  height = 5,
+  units = "in",
+  dpi = 300
+)
+```
+
+The scatterplot shows flipper length versus bill length, with different colors identifying the three species. Gentoo penguins generally have longer flippers than Adelie and Chinstrap penguins. Observations with missing measurements for either plotted variable are omitted.
+
+## Problem 2
+
+```{r create-dataframe}
+set.seed(123)
+
+variable_types = tibble(
+  normal_sample = rnorm(10),
+  is_positive = normal_sample > 0,
+  character_values = c(
+    "apple", "banana", "cherry", "apple", "banana",
+    "cherry", "apple", "banana", "cherry", "apple"
+  ),
+  factor_values = factor(
+    c(
+      "low", "medium", "high", "low", "medium",
+      "high", "low", "medium", "high", "low"
+    ),
+    levels = c("low", "medium", "high")
+  )
+)
+
+variable_types
+```
+
+This data frame contains 10 observations and four variables: a random sample from a standard Normal distribution, a logical indicator of whether each sample value is greater than zero, a character variable containing fruit names, and a factor with three levels. Setting a seed makes the random sample reproducible.
+
+```{r calculate-means}
+mean(pull(variable_types, normal_sample))
+mean(pull(variable_types, is_positive))
+mean(pull(variable_types, character_values))
+mean(pull(variable_types, factor_values))
+```
+
+The mean of the numeric sample is `r round(mean(pull(variable_types, normal_sample)), 3)`. The mean of the logical variable is `r mean(pull(variable_types, is_positive))`, which represents the proportion of sample values greater than zero. R treats TRUE as 1 and FALSE as 0 when calculating this mean.
+
+The character and factor variables both return NA with warnings. The mean() function does not directly accept these variables as numeric inputs.
+
+```{r numeric-coercion, results='hide', warning=FALSE}
+as.numeric(pull(variable_types, is_positive))
+as.numeric(pull(variable_types, character_values))
+as.numeric(pull(variable_types, factor_values))
+```
+
+Converting the logical variable to numeric produces 1 for TRUE and 0 for FALSE. This explains why its mean can be calculated directly.
+
+Converting the character variable produces NA values and a warning because the fruit names cannot be interpreted as numbers. Character strings representing numbers could be converted, but the fruit names used here cannot.
+
+Converting the factor produces its internal integer codes: 1 for low, 2 for medium, and 3 for high, following the specified level order. These codes represent categories rather than measured quantities. Although their mean could be calculated after conversion, it would not establish a meaningful average of the original categories. The original factor cannot be averaged directly.
